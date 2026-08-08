@@ -271,21 +271,21 @@ private fun FriendsTab(api: PicnymApi, onProfile: (String) -> Unit) {
         }
         if (results.isNotEmpty()) {
             item { Text("Search results", fontWeight = FontWeight.Bold) }
-            items(results, key = { it.userId }) { profile -> FriendRow(profile, "Add") { scope.launch { runCatching { api.requestFriend(profile.username) }; results = results.filterNot { it.userId == profile.userId }; load() } } { onProfile(profile.username) } }
+            items(results, key = { it.userId }) { profile -> FriendRow(profile, "Add", onAction = { scope.launch { runCatching { api.requestFriend(profile.username) }; results = results.filterNot { it.userId == profile.userId }; load() } }, onOpen = { onProfile(profile.username) }) }
         }
         error?.let { item { Text(it, color = MaterialTheme.colorScheme.error) } }
         friends?.incoming?.takeIf { it.isNotEmpty() }?.let { list ->
             item { Text("Requests", fontWeight = FontWeight.Bold) }
-            items(list, key = { it.id }) { entry -> FriendRow(entry.profile, "Accept") { scope.launch { runCatching { api.acceptFriend(entry.profile.userId) }; load() } } { onProfile(entry.profile.username) } }
+            items(list, key = { it.id }) { entry -> FriendRow(entry.profile, "Accept", onAction = { scope.launch { runCatching { api.acceptFriend(entry.profile.userId) }; load() } }, onOpen = { onProfile(entry.profile.username) }) }
         }
         friends?.outgoing?.takeIf { it.isNotEmpty() }?.let { list ->
             item { Text("Sent requests", fontWeight = FontWeight.Bold) }
-            items(list, key = { it.id }) { entry -> FriendRow(entry.profile, "Cancel") { scope.launch { runCatching { api.removeFriend(entry.profile.userId) }; load() } } { onProfile(entry.profile.username) } }
+            items(list, key = { it.id }) { entry -> FriendRow(entry.profile, "Cancel", onAction = { scope.launch { runCatching { api.removeFriend(entry.profile.userId) }; load() } }, onOpen = { onProfile(entry.profile.username) }) }
         }
         item { Text("Your friends", fontWeight = FontWeight.Bold) }
         val accepted = friends?.accepted.orEmpty()
         if (accepted.isEmpty()) item { Card { Text("No friends yet.", Modifier.padding(20.dp)) } }
-        items(accepted, key = { it.id }) { entry -> FriendRow(entry.profile, "Remove") { scope.launch { runCatching { api.removeFriend(entry.profile.userId) }; load() } } { onProfile(entry.profile.username) } }
+        items(accepted, key = { it.id }) { entry -> FriendRow(entry.profile, "Remove", onAction = { scope.launch { runCatching { api.removeFriend(entry.profile.userId) }; load() } }, onOpen = { onProfile(entry.profile.username) }) }
     }
 }
 
