@@ -4,6 +4,10 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val googleWebClientId = providers.gradleProperty("PICNYM_GOOGLE_WEB_CLIENT_ID")
+    .orElse("YOUR_WEB_CLIENT_ID.apps.googleusercontent.com")
+    .get()
+
 android {
     namespace = "ng.name.gojodev.picnym"
     compileSdk = 36
@@ -12,13 +16,14 @@ android {
         applicationId = "ng.name.gojodev.picnym"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "2.0.0"
 
         buildConfigField("String", "API_BASE", "\"https://ahvusnmuyfvdzjmdkgzj.supabase.co/functions/v1/picnym-api-v4\"")
         buildConfigField("String", "SUPABASE_URL", "\"https://ahvusnmuyfvdzjmdkgzj.supabase.co\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"sb_publishable_JODLl_4Ue29jwz2w8hSSSw_UO4l5OJZ\"")
         buildConfigField("String", "SITE_URL", "\"https://anonymous.gojodev.name.ng\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${googleWebClientId.replace("\"", "\\\"")}\"")
     }
 
     buildFeatures {
@@ -59,6 +64,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation("androidx.datastore:datastore-preferences:1.1.3")
+    implementation("androidx.credentials:credentials:1.6.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
 
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -69,6 +76,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

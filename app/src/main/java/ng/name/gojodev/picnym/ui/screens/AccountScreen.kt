@@ -60,6 +60,7 @@ import ng.name.gojodev.picnym.ui.StatusPill
 import ng.name.gojodev.picnym.ui.theme.AppThemeState
 import ng.name.gojodev.picnym.ui.theme.ThemeMode
 import ng.name.gojodev.picnym.util.copyUriToCache
+import ng.name.gojodev.picnym.util.clearGoogleCredentialState
 import ng.name.gojodev.picnym.util.openUrl
 
 @Composable
@@ -310,9 +311,23 @@ private fun SettingsTab(
     refresh: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var settings by remember(data.settings) { mutableStateOf(data.settings) }
     var deleteOpen by remember { mutableStateOf(false) }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = androidx.compose.foundation.layout.PaddingValues(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        item {
+            Card {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Help & safety", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("Review how reporting, blocking, hidden words and privacy work.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { openUrl(context, BuildConfig.SITE_URL + "/safety") }) { Text("Safety") }
+                        OutlinedButton(onClick = { openUrl(context, BuildConfig.SITE_URL + "/privacy") }) { Text("Privacy") }
+                        OutlinedButton(onClick = { openUrl(context, BuildConfig.SITE_URL + "/terms") }) { Text("Terms") }
+                    }
+                }
+            }
+        }
         item {
             Card {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -345,7 +360,7 @@ private fun SettingsTab(
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("Account controls", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(data.email, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    OutlinedButton(onClick = { scope.launch { auth.signOut(); onSignedOut() } }) { Text("Sign out") }
+                    OutlinedButton(onClick = { scope.launch { auth.signOut(); runCatching { clearGoogleCredentialState(context) }; onSignedOut() } }) { Text("Sign out") }
                     HorizontalDivider()
                     OutlinedButton(onClick = { deleteOpen = true }) { Text("Delete PICNYM account") }
                 }
@@ -354,7 +369,7 @@ private fun SettingsTab(
     }
     if (deleteOpen) DeleteAccountDialog(
         dismiss = { deleteOpen = false },
-        confirm = { scope.launch { try { api.deleteAccount(); onSignedOut() } catch (_: Throwable) {} } }
+        confirm = { scope.launch { try { api.deleteAccount(); runCatching { clearGoogleCredentialState(context) }; onSignedOut() } catch (_: Throwable) {} } }
     )
 }
 

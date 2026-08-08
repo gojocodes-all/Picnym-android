@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="picnym_navy">#12264B</color>
-    <color name="picnym_sage">#B9C9B2</color>
-    <color name="picnym_cream">#F1F2ED</color>
+    <color name="picnym_navy">#4C56E8</color>
+    <color name="picnym_sage">#53D6C5</color>
+    <color name="picnym_cream">#F7F7FB</color>
+    <color name="picnym_coral">#FF6D59</color>
 </resources>

@@ -23,11 +23,14 @@ import ng.name.gojodev.picnym.ui.screens.AccountScreen
 import ng.name.gojodev.picnym.ui.screens.AuthScreen
 import ng.name.gojodev.picnym.ui.screens.DashboardScreen
 import ng.name.gojodev.picnym.ui.screens.HomeScreen
+import ng.name.gojodev.picnym.ui.screens.OnboardingScreen
 import ng.name.gojodev.picnym.ui.screens.PollScreen
 import ng.name.gojodev.picnym.ui.screens.PublicInboxScreen
 import ng.name.gojodev.picnym.ui.screens.PublicProfileScreen
 import ng.name.gojodev.picnym.ui.theme.AppThemeState
 import ng.name.gojodev.picnym.ui.theme.ThemeMode
+
+private data class LaunchState(val signedIn: Boolean, val onboarded: Boolean)
 
 @Composable
 fun PicnymApp() {
@@ -37,19 +40,25 @@ fun PicnymApp() {
     val api = remember { PicnymApi(store, auth) }
     val scope = rememberCoroutineScope()
     val systemDark = isSystemInDarkTheme()
-    val signedIn by produceState<Boolean?>(initialValue = null, store) { value = store.current().signedIn }
+    val launchState by produceState<LaunchState?>(initialValue = null, store) {
+        value = LaunchState(store.current().signedIn, store.hasCompletedOnboarding())
+    }
 
     LaunchedEffect(store) {
         store.themeFlow.collect { AppThemeState.mode = ThemeMode.from(it) }
     }
 
-    if (signedIn == null) {
+    if (launchState == null) {
         LoadingScreen("Starting PICNYM…")
         return
     }
 
     val nav = rememberNavController()
-    val start = if (signedIn == true) "home" else "auth"
+    val start = when {
+        launchState?.signedIn == true -> "home"
+        launchState?.onboarded == true -> "auth"
+        else -> "onboarding"
+    }
 
     fun home() {
         nav.navigate("home") { popUpTo(nav.graph.startDestinationId) { inclusive = false }; launchSingleTop = true }
@@ -74,6 +83,14 @@ fun PicnymApp() {
     }
 
     NavHost(navController = nav, startDestination = start) {
+        composable("onboarding") {
+            OnboardingScreen {
+                scope.launch {
+                    store.completeOnboarding()
+                    nav.navigate("auth") { popUpTo("onboarding") { inclusive = true } }
+                }
+            }
+        }
         composable("auth") {
             AuthScreen(auth) {
                 nav.navigate("home") { popUpTo("auth") { inclusive = true } }
@@ -92,10 +109,15 @@ fun PicnymApp() {
             DashboardScreen(api, entry.arguments?.getString("slug").orEmpty(), onBack = { nav.popBackStack() }, onOpenPoll = ::poll, onOpenProfile = ::profile)
         }
         composable(
-            route = "send/{slug}",
-            arguments = listOf(navArgument("slug") { type = NavType.StringType }),
+            route = "send/{slug}?prompt={prompt}",
+            arguments = listOf(
+                navArgument("slug") { type = NavType.StringType },
+                navArgument("prompt") { type = NavType.StringType; nullable = true; defaultValue = null }
+            ),
             deepLinks = listOf(
+                navDeepLink { uriPattern = BuildConfig.SITE_URL + "/u/{slug}?prompt={prompt}" },
                 navDeepLink { uriPattern = BuildConfig.SITE_URL + "/u/{slug}" },
+                navDeepLink { uriPattern = "picnym://u/{slug}?prompt={prompt}" },
                 navDeepLink { uriPattern = "picnym://u/{slug}" }
             )
         ) { entry ->
@@ -103,6 +125,7 @@ fun PicnymApp() {
                 api = api,
                 auth = auth,
                 slug = entry.arguments?.getString("slug").orEmpty(),
+                initialPrompt = entry.arguments?.getString("prompt").orEmpty().take(180),
                 onBack = { nav.popBackStack() },
                 onProfile = ::profile,
                 onPollCreated = ::poll

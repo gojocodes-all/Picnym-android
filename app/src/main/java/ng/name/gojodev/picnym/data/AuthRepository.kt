@@ -56,6 +56,17 @@ class AuthRepository(private val store: SessionStore) {
         else AuthOutcome(false, "Account created. Check your email to confirm it, then sign in.")
     }
 
+    suspend fun signInWithGoogleIdToken(idToken: String): AuthOutcome {
+        if (idToken.isBlank()) throw ApiException(400, "Google did not return a valid ID token.")
+        val body = JSONObject()
+            .put("provider", "google")
+            .put("id_token", idToken)
+        val response = NetClient.execute(request("/auth/v1/token?grant_type=id_token", body))
+        val json = response.requireSuccess()
+        val session = saveTokens(json) ?: throw ApiException(401, "Google sign-in did not return a session.")
+        return AuthOutcome(session.signedIn, "Signed in with Google.")
+    }
+
     suspend fun refresh(): StoredSession? {
         val current = store.current()
         if (current.refreshToken.isBlank()) return null

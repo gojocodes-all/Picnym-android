@@ -1,6 +1,7 @@
 package ng.name.gojodev.picnym.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -26,6 +27,7 @@ class SessionStore(private val context: Context) {
         val userId = stringPreferencesKey("user_id")
         val email = stringPreferencesKey("email")
         val theme = stringPreferencesKey("theme")
+        val onboardingComplete = booleanPreferencesKey("onboarding_complete")
     }
 
     val sessionFlow: Flow<StoredSession> = context.picnymStore.data.map { prefs ->
@@ -38,6 +40,7 @@ class SessionStore(private val context: Context) {
     }
 
     val themeFlow: Flow<String> = context.picnymStore.data.map { it[Keys.theme] ?: "system" }
+    val onboardingFlow: Flow<Boolean> = context.picnymStore.data.map { it[Keys.onboardingComplete] ?: false }
 
     suspend fun current(): StoredSession = sessionFlow.first()
 
@@ -61,5 +64,11 @@ class SessionStore(private val context: Context) {
 
     suspend fun saveTheme(theme: String) {
         context.picnymStore.edit { it[Keys.theme] = theme }
+    }
+
+    suspend fun hasCompletedOnboarding(): Boolean = onboardingFlow.first()
+
+    suspend fun completeOnboarding() {
+        context.picnymStore.edit { it[Keys.onboardingComplete] = true }
     }
 }

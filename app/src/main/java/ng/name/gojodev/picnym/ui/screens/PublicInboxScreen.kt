@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
@@ -46,11 +48,20 @@ import ng.name.gojodev.picnym.util.NativeVoiceRecorder
 import ng.name.gojodev.picnym.util.copyUriToCache
 import java.io.File
 
+private val inboxPrompts = listOf(
+    "What is something I do that people remember?",
+    "What should I do more often?",
+    "What is your first impression of me?",
+    "Tell me an opinion you think I need to hear.",
+    "What is one thing you have always wanted to ask me?"
+)
+
 @Composable
 fun PublicInboxScreen(
     api: PicnymApi,
     auth: AuthRepository,
     slug: String,
+    initialPrompt: String = "",
     onBack: () -> Unit,
     onProfile: (String) -> Unit,
     onPollCreated: (String) -> Unit
@@ -64,7 +75,7 @@ fun PublicInboxScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
     var kind by remember { mutableStateOf("text") }
-    var text by remember { mutableStateOf("") }
+    var text by remember(initialPrompt) { mutableStateOf(initialPrompt) }
     var imageFile by remember { mutableStateOf<File?>(null) }
     var imageMime by remember { mutableStateOf("image/jpeg") }
     var voiceFile by remember { mutableStateOf<File?>(null) }
@@ -165,6 +176,20 @@ fun PublicInboxScreen(
                                 else -> true
                             }
                             FilterChip(selected = kind == value, enabled = enabled, onClick = { kind = value }, label = { Text(value.replaceFirstChar { it.uppercase() }) })
+                        }
+                    }
+
+                    if (kind == "text") {
+                        Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                            Text("Need a starting point?", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                            Row(
+                                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(7.dp)
+                            ) {
+                                inboxPrompts.forEach { prompt ->
+                                    AssistChip(onClick = { text = prompt }, label = { Text(prompt) })
+                                }
+                            }
                         }
                     }
 

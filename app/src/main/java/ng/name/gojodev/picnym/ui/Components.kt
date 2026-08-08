@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +34,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -56,9 +60,28 @@ import ng.name.gojodev.picnym.data.Profile
 
 @Composable
 fun PicnymMark(modifier: Modifier = Modifier, size: Dp = 42.dp) {
-    Row(modifier = modifier.size(size).clip(RoundedCornerShape(3.dp))) {
-        Box(Modifier.weight(1f).height(size).background(Color(0xFF12264B)))
-        Box(Modifier.weight(1f).height(size).background(Color(0xFFB9C9B2)))
+    val bubbleColor = MaterialTheme.colorScheme.primary
+    Box(modifier = modifier.size(size)) {
+        Box(
+            Modifier
+                .size(size * 0.20f)
+                .offset(x = size * 0.15f, y = size * 0.70f)
+                .rotate(45f)
+                .background(bubbleColor)
+        )
+        Box(
+            modifier = Modifier
+                .size(size * 0.88f)
+                .align(Alignment.TopCenter)
+                .clip(RoundedCornerShape(size * 0.28f, size * 0.28f, size * 0.28f, size * 0.10f))
+                .background(bubbleColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(size * 0.12f)) {
+                Box(Modifier.size(size * 0.13f).clip(CircleShape).background(Color.White))
+                Box(Modifier.size(size * 0.13f).clip(CircleShape).background(MaterialTheme.colorScheme.tertiary))
+            }
+        }
     }
 }
 
@@ -68,14 +91,15 @@ fun PicnymTopBar(title: String = "PICNYM", onBack: (() -> Unit)? = null, actions
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PicnymMark(size = 30.dp)
+                PicnymMark(size = 32.dp)
                 Text(title, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         },
         navigationIcon = {
             if (onBack != null) IconButton(onClick = onBack) { Icon(Icons.Outlined.ArrowBack, contentDescription = "Back") }
         },
-        actions = { actions() }
+        actions = { actions() },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
     )
 }
 
@@ -101,7 +125,7 @@ fun ProfileAvatar(profile: Profile?, size: Dp = 58.dp) {
 
 @Composable
 fun LoadingScreen(label: String = "Loading PICNYM…") {
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxWidth().padding(vertical = 56.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
             CircularProgressIndicator()
             Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -112,7 +136,7 @@ fun LoadingScreen(label: String = "Loading PICNYM…") {
 @Composable
 fun ErrorCard(message: String, onRetry: (() -> Unit)? = null) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(message, modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.error)
             if (onRetry != null) Button(onClick = onRetry) { Text("Retry") }
         }

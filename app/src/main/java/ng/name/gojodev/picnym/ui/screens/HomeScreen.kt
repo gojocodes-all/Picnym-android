@@ -1,6 +1,8 @@
 package ng.name.gojodev.picnym.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,6 +39,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,6 +56,7 @@ import ng.name.gojodev.picnym.ui.PicnymTopBar
 import ng.name.gojodev.picnym.ui.PremiumBadge
 import ng.name.gojodev.picnym.ui.ProfileAvatar
 import ng.name.gojodev.picnym.ui.StatusPill
+import ng.name.gojodev.picnym.ui.theme.PicnymPalette
 import ng.name.gojodev.picnym.util.shareText
 
 @Composable
@@ -101,37 +107,40 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     item {
-                        Card {
-                            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Card(colors = CardDefaults.cardColors(containerColor = Color.Transparent)) {
+                            Box(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(PicnymPalette.Indigo, PicnymPalette.IndigoStrong))).padding(22.dp)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                                Text("YOUR CREATOR SPACE", color = Color.White.copy(alpha = 0.72f), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                                     ProfileAvatar(data.profile, 64.dp)
                                     Column(Modifier.weight(1f)) {
                                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            Text(data.profile.displayName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                                            Text(data.profile.displayName, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
                                         }
-                                        Text("@${data.profile.username}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text("@${data.profile.username}", color = Color.White.copy(alpha = 0.74f))
                                     }
                                     if (data.profile.premium) PremiumBadge()
                                 }
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Stat("${data.stats.inboxes}", "Inboxes")
-                                    Stat("${data.stats.totalMessages}", "Messages")
-                                    Stat("${data.stats.friends}", "Friends")
+                                    Stat("${data.stats.inboxes}", "Inboxes", onDark = true)
+                                    Stat("${data.stats.totalMessages}", "Messages", onDark = true)
+                                    Stat("${data.stats.friends}", "Friends", onDark = true)
                                 }
+                            }
                             }
                         }
                     }
                     item {
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
-                                Text("Your anonymous inboxes", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
-                                Text("Native Android dashboard", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("Your links", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+                                Text("Open an inbox, test it or share it.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Button(onClick = { createOpen = true }) { Text("Create") }
                         }
                     }
                     if (data.inboxes.isEmpty()) {
-                        item { Card { Text("No inboxes yet. Create your first PICNYM link.", Modifier.padding(24.dp)) } }
+                        item { Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) { Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { Text("Your first link starts here.", style = MaterialTheme.typography.titleLarge); Text("Create a private inbox, then share the public link anywhere you want responses.", color = MaterialTheme.colorScheme.onSecondaryContainer); Button(onClick = { createOpen = true }) { Text("Create an inbox") } } } }
                     } else {
                         items(data.inboxes, key = { it.id }) { inbox ->
                             Card {
@@ -186,10 +195,10 @@ fun HomeScreen(
 }
 
 @Composable
-private fun Stat(value: String, label: String) {
+private fun Stat(value: String, label: String, onDark: Boolean = false) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = if (onDark) Color.White else MaterialTheme.colorScheme.onSurface)
+        Text(label, style = MaterialTheme.typography.labelMedium, color = if (onDark) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
