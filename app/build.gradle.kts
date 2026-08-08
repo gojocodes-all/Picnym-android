@@ -5,7 +5,7 @@ plugins {
 }
 
 val googleWebClientId = providers.gradleProperty("PICNYM_GOOGLE_WEB_CLIENT_ID")
-    .orElse("YOUR_WEB_CLIENT_ID.apps.googleusercontent.com")
+    .orElse("219138130798-6r74gng4um82ec97nl306psm4ss63e94.apps.googleusercontent.com")
     .get()
 
 android {
