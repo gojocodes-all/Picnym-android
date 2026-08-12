@@ -1,6 +1,7 @@
 package ng.name.gojodev.picnym.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Refresh
@@ -39,7 +41,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -58,6 +59,8 @@ import ng.name.gojodev.picnym.ui.ProfileAvatar
 import ng.name.gojodev.picnym.ui.StatusPill
 import ng.name.gojodev.picnym.ui.theme.PicnymPalette
 import ng.name.gojodev.picnym.util.shareText
+import ng.name.gojodev.picnym.util.isValidInboxHandle
+import ng.name.gojodev.picnym.util.normalizeInboxHandle
 
 @Composable
 fun HomeScreen(
@@ -94,7 +97,13 @@ fun HomeScreen(
             })
         },
         bottomBar = { MainBottomBar("home", onHome = {}, onAccount = onAccount) },
-        floatingActionButton = { FloatingActionButton(onClick = { createOpen = true }) { Text("+") } }
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { createOpen = true },
+                shape = MaterialTheme.shapes.small,
+                containerColor = MaterialTheme.colorScheme.primary
+            ) { Icon(Icons.Outlined.Add, "Create inbox") }
+        }
     ) { padding ->
         when {
             loading -> Column(Modifier.fillMaxSize().padding(padding).padding(24.dp)) { LoadingScreen("Loading your PICNYM…") }
@@ -107,10 +116,13 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     item {
-                        Card(colors = CardDefaults.cardColors(containerColor = Color.Transparent)) {
-                            Box(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(PicnymPalette.Indigo, PicnymPalette.IndigoStrong))).padding(22.dp)) {
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            Box(Modifier.fillMaxWidth().background(PicnymPalette.Ink).padding(22.dp)) {
                             Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                                Text("YOUR CREATOR SPACE", color = Color.White.copy(alpha = 0.72f), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                                Text("YOUR CREATOR SPACE", color = PicnymPalette.Orange, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                                     ProfileAvatar(data.profile, 64.dp)
                                     Column(Modifier.weight(1f)) {
@@ -140,10 +152,10 @@ fun HomeScreen(
                         }
                     }
                     if (data.inboxes.isEmpty()) {
-                        item { Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) { Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { Text("Your first link starts here.", style = MaterialTheme.typography.titleLarge); Text("Create a private inbox, then share the public link anywhere you want responses.", color = MaterialTheme.colorScheme.onSecondaryContainer); Button(onClick = { createOpen = true }) { Text("Create an inbox") } } } }
+                        item { Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer), border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary)) { Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { Text("Your first link starts here.", style = MaterialTheme.typography.titleLarge); Text("Create a private inbox, then share the public link anywhere you want responses.", color = MaterialTheme.colorScheme.onSecondaryContainer); Button(onClick = { createOpen = true }) { Text("Create an inbox") } } } }
                     } else {
                         items(data.inboxes, key = { it.id }) { inbox ->
-                            Card {
+                            Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {
                                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                         Column(Modifier.weight(1f)) {
@@ -154,8 +166,8 @@ fun HomeScreen(
                                     }
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                         Button(onClick = { onDashboard(inbox.slug) }, modifier = Modifier.weight(1f)) { Text("Open") }
-                                        OutlinedButton(onClick = { onPublicInbox(inbox.slug) }) { Icon(Icons.Outlined.Send, null) }
-                                        OutlinedButton(onClick = { shareText(context, "${BuildConfig.SITE_URL}/u/${inbox.slug}") }) { Icon(Icons.Outlined.Share, null) }
+                                        OutlinedButton(onClick = { onPublicInbox(inbox.slug) }) { Icon(Icons.Outlined.Send, "Open public inbox") }
+                                        OutlinedButton(onClick = { shareText(context, "${BuildConfig.SITE_URL}/u/${inbox.slug}") }) { Icon(Icons.Outlined.Share, "Share inbox link") }
                                         OutlinedButton(onClick = { deleteTarget = inbox }) { Text("Delete") }
                                     }
                                 }
@@ -212,10 +224,18 @@ private fun CreateInboxDialog(defaultName: String, onDismiss: () -> Unit, onCrea
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(name, { name = it }, label = { Text("Display name") }, singleLine = true)
-                OutlinedTextField(handle, { handle = it.lowercase().replace(" ", "-") }, label = { Text("Link name") }, prefix = { Text("/u/") }, singleLine = true)
+                OutlinedTextField(
+                    handle,
+                    { handle = normalizeInboxHandle(it) },
+                    label = { Text("Link name") },
+                    prefix = { Text("/u/") },
+                    supportingText = { Text("Letters, numbers and hyphens · up to 28 characters") },
+                    isError = handle.isNotEmpty() && !isValidInboxHandle(handle),
+                    singleLine = true
+                )
             }
         },
-        confirmButton = { Button(onClick = { if (name.isNotBlank() && handle.isNotBlank()) onCreate(name, handle) }) { Text("Create") } },
+        confirmButton = { Button(enabled = name.isNotBlank() && isValidInboxHandle(handle), onClick = { onCreate(name.trim(), handle) }) { Text("Create") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }

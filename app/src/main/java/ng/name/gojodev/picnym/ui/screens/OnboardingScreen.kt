@@ -1,6 +1,6 @@
 package ng.name.gojodev.picnym.ui.screens
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,37 +12,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Block
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.GraphicEq
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Poll
-import androidx.compose.material.icons.outlined.Security
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,31 +37,35 @@ private data class IntroPage(
     val eyebrow: String,
     val title: String,
     val description: String,
-    val color: Color,
-    val icons: List<ImageVector>
+    val panelColor: Color,
+    val panelText: Color,
+    val rows: List<String>
 )
 
 private val introPages = listOf(
     IntroPage(
-        eyebrow = "ONE LINK · FOUR FORMATS",
-        title = "Say more than text.",
-        description = "Open one shareable inbox for messages, photos, voice notes and quick polls.",
-        color = PicnymPalette.Indigo,
-        icons = listOf(Icons.Outlined.ChatBubbleOutline, Icons.Outlined.Image, Icons.Outlined.GraphicEq, Icons.Outlined.Poll)
+        eyebrow = "ONE LINK / FOUR FORMATS",
+        title = "Ask for honesty. Not just text.",
+        description = "Open one shareable inbox for anonymous text, supported photos, voice notes and quick polls.",
+        panelColor = PicnymPalette.Blue,
+        panelText = Color.White,
+        rows = listOf("Text", "Photo", "Voice", "Poll")
     ),
     IntroPage(
         eyebrow = "CONTROL BEFORE CURIOSITY",
         title = "Your inbox. Your rules.",
         description = "Pause your link, hide words, limit who can send, report messages and block unwanted senders.",
-        color = PicnymPalette.Coral,
-        icons = listOf(Icons.Outlined.Security, Icons.Outlined.Tune, Icons.Outlined.Block)
+        panelColor = PicnymPalette.Orange,
+        panelText = PicnymPalette.Ink,
+        rows = listOf("Pause", "Filter", "Restrict", "Block")
     ),
     IntroPage(
-        eyebrow = "PRIVATE FIRST",
-        title = "Share only what you choose.",
-        description = "Replies stay private until you deliberately publish or turn them into a share-ready PICNYM card.",
-        color = PicnymPalette.Mint,
-        icons = listOf(Icons.Outlined.ChatBubbleOutline, Icons.Outlined.Share)
+        eyebrow = "PRIVATE BY DEFAULT",
+        title = "You decide what happens next.",
+        description = "Messages stay private until you deliberately reply, publish or turn an answer into a share card.",
+        panelColor = PicnymPalette.Ink,
+        panelText = PicnymPalette.Paper,
+        rows = listOf("Keep private", "Reply", "Publish", "Remove")
     )
 )
 
@@ -95,7 +82,10 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PicnymMark(size = 36.dp)
-                Text("PICNYM", modifier = Modifier.padding(start = 10.dp).weight(1f), fontWeight = FontWeight.Black)
+                Column(Modifier.padding(start = 10.dp).weight(1f)) {
+                    Text("PICNYM", fontWeight = FontWeight.Black)
+                    Text("PRIVATE INBOX", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 TextButton(onClick = onFinish) { Text("Skip") }
             }
 
@@ -106,35 +96,35 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                 pageSpacing = 14.dp
             ) { index ->
                 val page = introPages[index]
-                val scale by animateFloatAsState(if (pager.currentPage == index) 1f else 0.94f, label = "introCardScale")
                 Column(
-                    modifier = Modifier.fillMaxSize().graphicsLayer { scaleX = scale; scaleY = scale }.padding(vertical = 22.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize().padding(vertical = 24.dp),
+                    horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    IntroArtwork(page, index)
+                    IntroLedger(page)
                     Spacer(Modifier.height(30.dp))
-                    Text(page.eyebrow, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black)
+                    Text(page.eyebrow, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
                     Spacer(Modifier.height(10.dp))
-                    Text(page.title, style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center)
+                    Text(page.title, style = MaterialTheme.typography.displaySmall)
                     Spacer(Modifier.height(12.dp))
                     Text(
                         page.description,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     introPages.indices.forEach { index ->
                         Box(
                             Modifier
-                                .size(if (pager.currentPage == index) 22.dp else 7.dp, 7.dp)
-                                .clip(CircleShape)
+                                .width(if (pager.currentPage == index) 24.dp else 8.dp)
+                                .height(4.dp)
                                 .background(if (pager.currentPage == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline)
                         )
                     }
@@ -159,46 +149,25 @@ fun OnboardingScreen(onFinish: () -> Unit) {
 }
 
 @Composable
-private fun IntroArtwork(page: IntroPage, index: Int) {
-    Box(
-        modifier = Modifier.fillMaxWidth().height(280.dp).clip(RoundedCornerShape(30.dp)).background(page.color),
-        contentAlignment = Alignment.Center
+private fun IntroLedger(page: IntroPage) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = page.panelColor,
+        contentColor = page.panelText,
+        shape = MaterialTheme.shapes.small,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground)
     ) {
-        Box(Modifier.size(210.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.10f)))
-        if (index == 0) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                page.icons.chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        row.forEach { icon -> IntroIcon(icon, dark = true) }
-                    }
+        Column(Modifier.padding(24.dp)) {
+            Text("PICNYM / MESSAGE DESK", style = MaterialTheme.typography.labelSmall, color = page.panelText.copy(alpha = .74f))
+            Spacer(Modifier.height(28.dp))
+            page.rows.forEachIndexed { index, label ->
+                HorizontalDivider(color = page.panelText.copy(alpha = .46f))
+                Row(Modifier.fillMaxWidth().padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("0${index + 1}", modifier = Modifier.width(42.dp), style = MaterialTheme.typography.labelMedium)
+                    Text(label, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
                 }
             }
-        } else {
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(22.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-            ) {
-                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    page.icons.forEach { icon ->
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            IntroIcon(icon, dark = false)
-                            Box(Modifier.size(if (index == 1) 108.dp else 132.dp, 8.dp).clip(CircleShape).background(Color(0xFFE7E8F1)))
-                        }
-                    }
-                }
-            }
+            HorizontalDivider(color = page.panelText.copy(alpha = .46f))
         }
-    }
-}
-
-@Composable
-private fun IntroIcon(icon: ImageVector, dark: Boolean) {
-    Box(
-        Modifier.size(if (dark) 72.dp else 42.dp).clip(RoundedCornerShape(if (dark) 22.dp else 13.dp))
-            .background(if (dark) Color.White.copy(alpha = 0.16f) else Color(0xFFEEF0FF)),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(icon, contentDescription = null, tint = if (dark) Color.White else PicnymPalette.Indigo, modifier = Modifier.size(if (dark) 30.dp else 22.dp))
     }
 }

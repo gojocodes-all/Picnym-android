@@ -3,6 +3,7 @@ package ng.name.gojodev.picnym.ui.screens
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -144,7 +145,7 @@ fun PublicInboxScreen(
                     Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Card {
+                    Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {
                         Column(Modifier.fillMaxWidth().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             ProfileAvatar(box.profile, 76.dp)
                             Text(box.displayName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
@@ -156,7 +157,7 @@ fun PublicInboxScreen(
                     }
 
                     if (box.settings.paused || box.settings.registeredOnly || box.settings.friendsOnly) {
-                        Card {
+                        Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)) {
                             Text(
                                 when {
                                     box.settings.paused -> "This inbox is paused and is not accepting messages."
@@ -175,7 +176,7 @@ fun PublicInboxScreen(
                                 "poll" -> box.settings.allowPolls
                                 else -> true
                             }
-                            FilterChip(selected = kind == value, enabled = enabled, onClick = { kind = value }, label = { Text(value.replaceFirstChar { it.uppercase() }) })
+                            FilterChip(selected = kind == value, enabled = enabled, onClick = { kind = value }, shape = MaterialTheme.shapes.extraSmall, label = { Text(value.replaceFirstChar { it.uppercase() }) })
                         }
                     }
 
@@ -187,7 +188,7 @@ fun PublicInboxScreen(
                                 horizontalArrangement = Arrangement.spacedBy(7.dp)
                             ) {
                                 inboxPrompts.forEach { prompt ->
-                                    AssistChip(onClick = { text = prompt }, label = { Text(prompt) })
+                                    AssistChip(onClick = { text = prompt }, shape = MaterialTheme.shapes.extraSmall, label = { Text(prompt) })
                                 }
                             }
                         }
@@ -227,7 +228,7 @@ fun PublicInboxScreen(
                     }
 
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                    info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
+                    info?.let { Text(it, color = MaterialTheme.colorScheme.tertiary) }
                     Button(
                         enabled = !sending && !box.settings.paused && (!box.settings.registeredOnly || signedIn) && (!box.settings.friendsOnly || signedIn),
                         onClick = ::send,

@@ -1,11 +1,14 @@
 package ng.name.gojodev.picnym.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -125,9 +128,9 @@ fun DashboardScreen(
                             OutlinedTextField(query, { query = it }, modifier = Modifier.fillMaxWidth(), label = { Text("Search messages and replies") }, singleLine = true)
                         }
                         item {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
                                 listOf("all", "text", "image", "voice", "poll").forEach { value ->
-                                    FilterChip(selected = kind == value, onClick = { kind = value }, label = { Text(value.replaceFirstChar { it.uppercase() }) })
+                                    FilterChip(selected = kind == value, onClick = { kind = value }, shape = MaterialTheme.shapes.extraSmall, label = { Text(value.replaceFirstChar { it.uppercase() }) })
                                 }
                             }
                         }
@@ -137,7 +140,7 @@ fun DashboardScreen(
                                 Checkbox(showArchived, { showArchived = it }); Text("Archived")
                             }
                         }
-                        if (messages.isEmpty()) item { Card { Text("No messages match these filters.", Modifier.padding(22.dp)) } }
+                        if (messages.isEmpty()) item { Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) { Text("No messages match these filters.", Modifier.padding(22.dp)) } }
                         items(messages, key = { it.id }) { message ->
                             NativeMessageCard(
                                 message = message,
@@ -161,9 +164,9 @@ fun DashboardScreen(
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(18.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        if (polls.isEmpty()) item { Card { Text("No polls received yet.", Modifier.padding(22.dp)) } }
+                        if (polls.isEmpty()) item { Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) { Text("No polls received yet.", Modifier.padding(22.dp)) } }
                         items(polls, key = { it.id }) { poll ->
-                            Card(onClick = { onOpenPoll(poll.slug) }) { Column(Modifier.padding(18.dp)) { PollSummary(poll) } }
+                            Card(onClick = { onOpenPoll(poll.slug) }, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) { Column(Modifier.padding(18.dp)) { PollSummary(poll) } }
                         }
                     }
                 }
@@ -213,7 +216,7 @@ private fun NativeMessageCard(
     onOpenProfile: (String) -> Unit
 ) {
     var menu by remember { mutableStateOf(false) }
-    Card {
+    Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (message.senderProfile != null) {

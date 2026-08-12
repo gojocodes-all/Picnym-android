@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,8 +18,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -94,7 +95,7 @@ fun AuthScreen(auth: AuthRepository, onSignedIn: () -> Unit) {
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 34.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().widthIn(max = 560.dp), verticalAlignment = Alignment.CenterVertically) {
             PicnymMark(size = 44.dp)
             Column(Modifier.padding(start = 12.dp).weight(1f)) {
                 Text("PICNYM", fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleLarge)
@@ -119,19 +120,20 @@ fun AuthScreen(auth: AuthRepository, onSignedIn: () -> Unit) {
 
         Spacer(Modifier.height(26.dp))
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().widthIn(max = 560.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         ) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = signUp, onClick = { changeMode(true) }, modifier = Modifier.weight(1f), label = { Text("Create account") }, enabled = !busy)
-                    FilterChip(selected = !signUp, onClick = { changeMode(false) }, modifier = Modifier.weight(1f), label = { Text("Sign in") }, enabled = !busy)
+                    FilterChip(selected = signUp, onClick = { changeMode(true) }, modifier = Modifier.weight(1f), shape = MaterialTheme.shapes.extraSmall, label = { Text("Create account") }, enabled = !busy)
+                    FilterChip(selected = !signUp, onClick = { changeMode(false) }, modifier = Modifier.weight(1f), shape = MaterialTheme.shapes.extraSmall, label = { Text("Sign in") }, enabled = !busy)
                 }
 
                 OutlinedButton(onClick = ::runGoogleSignIn, modifier = Modifier.fillMaxWidth(), enabled = !busy) {
-                    Box(Modifier.background(MaterialTheme.colorScheme.primary, CircleShape).padding(horizontal = 7.dp, vertical = 3.dp)) {
-                        Text("G", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Black)
+                    Box(Modifier.background(MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.extraSmall).padding(horizontal = 7.dp, vertical = 3.dp)) {
+                        Text("G", color = MaterialTheme.colorScheme.onSecondary, fontWeight = FontWeight.Black)
                     }
                     Text("Continue with Google", modifier = Modifier.padding(start = 10.dp))
                 }
