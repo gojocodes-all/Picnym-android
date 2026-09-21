@@ -13,3 +13,6 @@ fun normalizeInboxHandle(value: String): String = value
     .trimEnd('-')
 
 fun isValidInboxHandle(value: String): Boolean = validInboxHandle.matches(value)
+
+fun isValidPasswordForAuth(password: String, creatingAccount: Boolean): Boolean =
+    if (creatingAccount) password.length >= 8 else password.isNotBlank()

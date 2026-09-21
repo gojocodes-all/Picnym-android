@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
 import ng.name.gojodev.picnym.BuildConfig
 import ng.name.gojodev.picnym.data.AuthRepository
 import ng.name.gojodev.picnym.ui.PicnymMark
+import ng.name.gojodev.picnym.util.isValidPasswordForAuth
 import ng.name.gojodev.picnym.util.openUrl
 import ng.name.gojodev.picnym.util.requestGoogleIdToken
 
@@ -177,8 +178,12 @@ fun AuthScreen(auth: AuthRepository, onSignedIn: () -> Unit) {
                         }
                         Button(
                             onClick = {
-                                if (email.isBlank() || password.length < 8 || (create && displayName.isBlank())) {
-                                    error = "Enter valid details. Passwords need at least 8 characters."
+                                if (email.isBlank() || !isValidPasswordForAuth(password, create) || (create && displayName.isBlank())) {
+                                    error = if (create) {
+                                        "Enter valid details. Passwords need at least 8 characters."
+                                    } else {
+                                        "Enter your email and password."
+                                    }
                                     return@Button
                                 }
                                 if (create && !eligible) {
