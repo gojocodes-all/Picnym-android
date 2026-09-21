@@ -27,4 +27,16 @@ class InputRulesTest {
         assertFalse(isValidInboxHandle("picnym-"))
         assertTrue(isValidInboxHandle("picnym-v3"))
     }
+
+    @Test
+    fun requiresEightCharactersWhenCreatingAnAccount() {
+        assertFalse(isValidPasswordForAuth("short7", creatingAccount = true))
+        assertTrue(isValidPasswordForAuth("eight888", creatingAccount = true))
+    }
+
+    @Test
+    fun letsExistingAccountsSubmitAnyNonBlankPassword() {
+        assertFalse(isValidPasswordForAuth("", creatingAccount = false))
+        assertTrue(isValidPasswordForAuth("legacy", creatingAccount = false))
+    }
 }
