@@ -29,9 +29,14 @@ Significant dependencies: Compose Material 3 for accessible native controls, Nav
 
 ## Build and verify
 
+The checked-in Gradle Wrapper pins Gradle 8.13, verifies the downloaded
+distribution checksum and keeps local and CI builds on the same toolchain.
+
 ```bash
-gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleRelease
+./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleRelease
 ```
+
+On Windows Command Prompt, use `gradlew.bat` instead of `./gradlew`.
 
 Version 3.0.0 uses the same API and account data as the web client; no database migration is required for this visual release.
 
