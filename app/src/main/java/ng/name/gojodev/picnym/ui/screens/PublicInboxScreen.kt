@@ -47,6 +47,7 @@ import ng.name.gojodev.picnym.ui.PicnymTopBar
 import ng.name.gojodev.picnym.ui.ProfileAvatar
 import ng.name.gojodev.picnym.util.NativeVoiceRecorder
 import ng.name.gojodev.picnym.util.copyUriToCache
+import ng.name.gojodev.picnym.util.publicMessageValidationError
 import java.io.File
 
 private val inboxPrompts = listOf(
@@ -118,6 +119,19 @@ fun PublicInboxScreen(
     fun send() {
         val box = inbox ?: return
         if (box.settings.paused) { error = "This inbox is paused."; return }
+        val validationError = publicMessageValidationError(
+            kind = kind,
+            text = text,
+            hasImage = imageFile != null,
+            hasVoice = voiceFile != null,
+            question = question,
+            options = options
+        )
+        if (validationError != null) {
+            error = validationError
+            info = null
+            return
+        }
         sending = true; error = null; info = null
         scope.launch {
             try {

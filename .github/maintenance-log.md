@@ -1,5 +1,41 @@
 # Maintenance log
 
+## 2026-10-05 — Validate anonymous messages before submission
+
+### Rationale
+
+The public inbox composer allowed blank text, incomplete polls and missing media
+to enter the send coroutine. These invalid submissions either reached the API
+or failed only after the UI entered its sending state. The composer now reports
+a specific local validation error before any network work begins.
+
+### Files changed
+
+- `app/src/main/java/ng/name/gojodev/picnym/util/InputRules.kt` — centralize
+  validation for text, image, voice and poll submissions.
+- `app/src/main/java/ng/name/gojodev/picnym/ui/screens/PublicInboxScreen.kt` —
+  validate the current composer state before starting a send.
+- `app/src/test/java/ng/name/gojodev/picnym/util/InputRulesTest.kt` — cover valid
+  and incomplete states for every supported message type.
+- `.github/maintenance-log.md` — record this maintenance work.
+
+### Validation
+
+- Ran the JVM unit tests.
+- Ran Android lint for the debug variant.
+- Built the debug and release APKs.
+- Reviewed the complete diff for accessibility, security, compatibility and
+  repository conventions.
+
+### Risk
+
+Low. Valid submissions use the existing API paths unchanged. Only submissions
+that cannot produce a usable message are stopped locally with clearer feedback.
+
+### Rollback
+
+Revert the pull request's squash commit to restore server-side-only validation.
+
 ## 2026-09-28 — Pin the local and CI Gradle toolchain
 
 ### Rationale
