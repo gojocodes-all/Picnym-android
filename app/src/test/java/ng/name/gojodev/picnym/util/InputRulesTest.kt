@@ -39,4 +39,35 @@ class InputRulesTest {
         assertFalse(isValidPasswordForAuth("", creatingAccount = false))
         assertTrue(isValidPasswordForAuth("legacy", creatingAccount = false))
     }
+
+    @Test
+    fun requiresContentForTextAndMediaMessages() {
+        assertEquals("Write a message before sending.", publicMessageValidationError("text", text = "   "))
+        assertEquals(null, publicMessageValidationError("text", text = "Say something kind"))
+        assertEquals("Choose an image before sending.", publicMessageValidationError("image"))
+        assertEquals(null, publicMessageValidationError("image", hasImage = true))
+        assertEquals("Record a voice note before sending.", publicMessageValidationError("voice"))
+        assertEquals(null, publicMessageValidationError("voice", hasVoice = true))
+    }
+
+    @Test
+    fun requiresAQuestionAndTwoNonBlankPollOptions() {
+        assertEquals(
+            "Add a poll question before sending.",
+            publicMessageValidationError("poll", options = listOf("Yes", "No"))
+        )
+        assertEquals(
+            "Add at least two poll options before sending.",
+            publicMessageValidationError("poll", question = "Choose one", options = listOf("Yes", " "))
+        )
+        assertEquals(
+            null,
+            publicMessageValidationError("poll", question = "Choose one", options = listOf("Yes", "No"))
+        )
+    }
+
+    @Test
+    fun rejectsUnsupportedMessageKinds() {
+        assertEquals("Choose a supported message type.", publicMessageValidationError("video"))
+    }
 }
