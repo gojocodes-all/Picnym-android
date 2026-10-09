@@ -1,5 +1,34 @@
 # Maintenance log
 
+## 2026-10-09 — Expand the Android project guide
+
+### Rationale
+
+The root README named the native stack and product features but did not provide a complete onboarding path. Supported Android versions, first-time setup, runtime configuration boundaries, deep-link contracts, repository structure, CI artifacts, local-data behavior and contribution checks were difficult to discover without reading Gradle and Kotlin source.
+
+### Files changed
+
+- `README.md` — document verified requirements, setup, architecture, runtime configuration, navigation links, repository structure, validation, build outputs, local data, security and contribution guidance.
+- `.github/maintenance-log.md` — record this documentation work.
+
+### Validation
+
+- Compared Android and JDK requirements with `app/build.gradle.kts` and the checked-in wrapper.
+- Compared permissions, backup/cleartext policy and link hosts with `AndroidManifest.xml`.
+- Compared routes and prompt handling with `PicnymApp.kt`.
+- Compared storage and network claims with `SessionStore.kt` and `ApiSupport.kt`.
+- Compared validation and artifact paths with `.github/workflows/android.yml` and `BUILDING.md`.
+- Ran the hosted Android workflow: wrapper validation, JVM tests, Android lint, and debug/release APK builds.
+- Reviewed the complete diff for accuracy, secrets, security guidance, compatibility and repository conventions.
+
+### Risk
+
+Low. This change updates documentation only. Application code, dependencies, configuration values, permissions, APIs, signing and runtime behavior are unchanged.
+
+### Rollback
+
+Revert this pull request to restore the shorter project overview.
+
 ## 2026-10-05 — Validate anonymous messages before submission
 
 ### Rationale
