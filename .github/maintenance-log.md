@@ -1,5 +1,35 @@
 # Maintenance log
 
+## 2026-10-16 — Make session refresh atomic and failure-aware
+
+### Rationale
+
+Authenticated screens can start overlapping API calls, including an initial load and a user-requested refresh. When an access token expired, each `401` previously exchanged the same rotating Supabase refresh token independently. The refresh path also cleared local credentials for every non-success response, including rate limits and temporary server failures, and an explicitly anonymous request could acquire credentials during its retry. Session mutations are now serialized, successful refreshes are shared by callers that failed with the same token, and only documented terminal Auth error codes invalidate the stored session.
+
+### Files changed
+
+- `app/src/main/java/ng/name/gojodev/picnym/data/SessionCoordinator.kt` — serialize session mutations, coalesce successful refreshes and classify terminal refresh failures.
+- `app/src/main/java/ng/name/gojodev/picnym/data/AuthRepository.kt` — route sign-in, refresh, account-deletion cleanup and sign-out through the coordinator, and preserve sessions after transient Auth failures.
+- `app/src/main/java/ng/name/gojodev/picnym/data/PicnymApi.kt` — identify the rejected access token and retry only requests that originally carried credentials.
+- `app/src/test/java/ng/name/gojodev/picnym/data/SessionCoordinatorTest.kt` — cover concurrent refreshes, queued session mutation, stale-token reuse, terminal/transient failures and missing refresh tokens.
+- `README.md` — document the session-refresh boundary and retry guarantees.
+- `.github/maintenance-log.md` — record this maintenance work.
+
+### Validation
+
+- Ran the JVM unit tests.
+- Ran Android lint for the debug variant.
+- Built the debug and unsigned release APKs.
+- Reviewed the complete diff for session security, anonymous-request isolation, backward compatibility and repository conventions.
+
+### Risk
+
+Low. API routes, request payloads, dependencies and successful sign-in behavior are unchanged. The change only serializes local session writes, avoids duplicate refresh exchanges and retains credentials after failures that do not prove the session is invalid.
+
+### Rollback
+
+Revert this pull request's squash commit to restore independent refresh attempts and the previous non-success handling.
+
 ## 2026-10-09 — Expand the Android project guide
 
 ### Rationale

@@ -64,7 +64,7 @@ See [BUILDING.md](BUILDING.md) for Google Cloud and Supabase provider setup, APK
 | Jetpack Compose | Native screens, controls and the shared visual system |
 | Navigation Compose | Onboarding, authentication, home, account, inbox, profile, poll and dashboard routes |
 | `PicnymApi` / OkHttp | PICNYM v4 API requests, uploads and response handling |
-| `AuthRepository` | Email/password auth, Google ID-token exchange and session refresh |
+| `AuthRepository` / `SessionCoordinator` | Auth flows plus serialized session mutation and refresh |
 | DataStore / `SessionStore` | Access and refresh tokens, user identity, theme and onboarding state |
 | Android Credential Manager | Native Google account selection |
 | Coil | Remote profile and media images |
@@ -73,6 +73,8 @@ See [BUILDING.md](BUILDING.md) for Google Cloud and Supabase provider setup, APK
 The app selects its initial route from local onboarding and session state. Authenticated users enter the home screen; returning signed-out users enter authentication; new installations see onboarding first.
 
 Network calls use HTTPS. The shared OkHttp client uses a 20-second connection timeout and 90-second read/write timeouts. Non-success API responses are converted into `ApiException` messages at the data boundary.
+
+Authenticated requests retry once after a `401`. Concurrent requests reuse the first successful token refresh, while transient Supabase Auth errors preserve the stored session for a later retry. Only terminal session error codes clear local credentials, and explicitly anonymous requests are never retried with an authorization header.
 
 ## Runtime configuration
 
