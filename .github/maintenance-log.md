@@ -1,5 +1,33 @@
 # Maintenance log
 
+## 2026-10-21 — Normalize account identity fields before authentication
+
+### Rationale
+
+The email and display-name fields accepted accidental leading or trailing whitespace, then sent those raw values to Supabase. Mobile keyboards and pasted credentials can introduce invisible padding, causing valid sign-in details to fail or creating a visibly padded profile name. Authentication now trims identity fields before validation and submission while leaving passwords unchanged.
+
+### Files changed
+
+- `app/src/main/java/ng/name/gojodev/picnym/util/InputRules.kt` — add focused normalization helpers for authentication email and display name.
+- `app/src/main/java/ng/name/gojodev/picnym/ui/screens/AuthScreen.kt` — validate, display and submit normalized identity fields.
+- `app/src/test/java/ng/name/gojodev/picnym/util/InputRulesTest.kt` — cover padded email and display-name input.
+- `.github/maintenance-log.md` — record the change, validation, risk and rollback.
+
+### Validation
+
+- Ran the JVM unit tests.
+- Ran Android lint for the debug variant.
+- Built the debug and unsigned release APKs.
+- Reviewed the complete diff for authentication behavior, password preservation, accessibility, security, backward compatibility and repository conventions.
+
+### Risk
+
+Low. Only surrounding whitespace is removed from email and display name at submission. Passwords, Google sign-in, API routes, dependencies, session storage and valid unpadded credentials are unchanged.
+
+### Rollback
+
+Revert this pull request to restore raw email and display-name submission; no data migration or credential change is required.
+
 ## 2026-10-16 — Make session refresh atomic and failure-aware
 
 ### Rationale

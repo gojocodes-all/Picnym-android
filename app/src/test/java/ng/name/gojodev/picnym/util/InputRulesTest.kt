@@ -29,6 +29,12 @@ class InputRulesTest {
     }
 
     @Test
+    fun trimsAuthIdentityFieldsWithoutChangingTheirContent() {
+        assertEquals("gojo@example.com", normalizeAuthEmail("  gojo@example.com\n"))
+        assertEquals("Gojo Codes", normalizeDisplayName("\tGojo Codes  "))
+    }
+
+    @Test
     fun requiresEightCharactersWhenCreatingAnAccount() {
         assertFalse(isValidPasswordForAuth("short7", creatingAccount = true))
         assertTrue(isValidPasswordForAuth("eight888", creatingAccount = true))

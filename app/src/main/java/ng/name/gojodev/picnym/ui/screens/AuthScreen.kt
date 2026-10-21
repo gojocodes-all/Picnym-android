@@ -52,6 +52,8 @@ import ng.name.gojodev.picnym.BuildConfig
 import ng.name.gojodev.picnym.data.AuthRepository
 import ng.name.gojodev.picnym.ui.PicnymMark
 import ng.name.gojodev.picnym.util.isValidPasswordForAuth
+import ng.name.gojodev.picnym.util.normalizeAuthEmail
+import ng.name.gojodev.picnym.util.normalizeDisplayName
 import ng.name.gojodev.picnym.util.openUrl
 import ng.name.gojodev.picnym.util.requestGoogleIdToken
 
@@ -178,7 +180,9 @@ fun AuthScreen(auth: AuthRepository, onSignedIn: () -> Unit) {
                         }
                         Button(
                             onClick = {
-                                if (email.isBlank() || !isValidPasswordForAuth(password, create) || (create && displayName.isBlank())) {
+                                val normalizedEmail = normalizeAuthEmail(email)
+                                val normalizedDisplayName = normalizeDisplayName(displayName)
+                                if (normalizedEmail.isBlank() || !isValidPasswordForAuth(password, create) || (create && normalizedDisplayName.isBlank())) {
                                     error = if (create) {
                                         "Enter valid details. Passwords need at least 8 characters."
                                     } else {
@@ -190,10 +194,16 @@ fun AuthScreen(auth: AuthRepository, onSignedIn: () -> Unit) {
                                     error = "Confirm that you are 18+ and accept the Terms first."
                                     return@Button
                                 }
+                                email = normalizedEmail
+                                if (create) displayName = normalizedDisplayName
                                 busy = true; error = null; message = null
                                 scope.launch {
                                     try {
-                                        val result = if (create) auth.signUp(displayName, email, password) else auth.signIn(email, password)
+                                        val result = if (create) {
+                                            auth.signUp(normalizedDisplayName, normalizedEmail, password)
+                                        } else {
+                                            auth.signIn(normalizedEmail, password)
+                                        }
                                         message = result.message
                                         if (result.signedIn) onSignedIn()
                                     } catch (t: Throwable) {
