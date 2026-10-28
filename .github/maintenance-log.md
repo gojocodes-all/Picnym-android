@@ -1,5 +1,51 @@
 # Maintenance log
 
+## 2026-10-28 — Make Android CI immutable and bounded
+
+### Rationale
+
+The Android workflow used movable major-version tags for every external action.
+Those tags can change the code executed by a previously reviewed workflow
+without a repository diff. The job also retained checkout credentials, allowed
+duplicate runs for superseded commits and inherited GitHub's six-hour default
+timeout. CI now executes verified action commits with an explicitly bounded,
+least-privilege lifecycle.
+
+### Files changed
+
+- `.github/workflows/android.yml` — pin all actions to immutable upstream
+  commits, disable checkout credential persistence, cancel superseded runs and
+  cap the build job at 30 minutes.
+- `BUILDING.md` — document the CI safeguards and the required action-update
+  procedure.
+- `.github/maintenance-log.md` — record the change, validation, risk and
+  rollback.
+
+### Validation
+
+- Resolved each configured upstream release tag through GitHub's Git data API;
+  the Gradle Actions `v6.4.1` tag has a valid signature.
+- Parsed the workflow as YAML and verified that every `uses:` reference is a
+  full 40-character commit SHA.
+- Attempted the repository's full Gradle validation command locally; the
+  sandbox could not reach `services.gradle.org`, so tests, lint and APK builds
+  are delegated to the pull request's hosted Android workflow.
+- Reviewed the complete diff for credential exposure, permissions, build
+  behavior, backward compatibility and repository conventions.
+
+### Risk
+
+Low. Application source, dependencies, API behavior, SDK targets and artifact
+paths are unchanged. The workflow still runs the same Gradle tasks with the
+same action major versions; only their exact revisions and execution bounds are
+now explicit.
+
+### Rollback
+
+Revert this pull request to restore movable major-version action tags and the
+previous unbounded workflow lifecycle; no application or data rollback is
+required.
+
 ## 2026-10-21 — Normalize account identity fields before authentication
 
 ### Rationale
