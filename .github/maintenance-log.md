@@ -28,8 +28,10 @@ least-privilege lifecycle.
 - Parsed the workflow as YAML and verified that every `uses:` reference is a
   full 40-character commit SHA.
 - Attempted the repository's full Gradle validation command locally; the
-  sandbox could not reach `services.gradle.org`, so tests, lint and APK builds
-  are delegated to the pull request's hosted Android workflow.
+  sandbox could not reach `services.gradle.org`.
+- The pull request's hosted Android workflow validated the wrapper, ran the JVM
+  unit tests and Android lint, built both APK variants and uploaded both
+  artifacts successfully.
 - Reviewed the complete diff for credential exposure, permissions, build
   behavior, backward compatibility and repository conventions.
 
