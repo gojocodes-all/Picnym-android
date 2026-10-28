@@ -52,7 +52,11 @@ For release builds, add the release/App Signing SHA-1 to the Android OAuth clien
 
 GitHub Actions validates the wrapper, runs the same wrapper command for pull
 requests and pushes to `main`, and uploads both APK variants as workflow
-artifacts.
+artifacts. The workflow pins every action to an immutable commit, disables
+checkout credential persistence, cancels superseded builds on the same ref and
+limits the build job to 30 minutes. When updating an action, resolve the desired
+upstream release tag to its commit and update both the SHA and version comment
+together.
 
 ## Signing
 
