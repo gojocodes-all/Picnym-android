@@ -47,6 +47,14 @@ class InputRulesTest {
     }
 
     @Test
+    fun discardsOnlyAnActiveRecordingWhenLeavingVoiceMode() {
+        assertTrue(shouldDiscardVoiceRecording("voice", "text", isRecording = true))
+        assertFalse(shouldDiscardVoiceRecording("voice", "voice", isRecording = true))
+        assertFalse(shouldDiscardVoiceRecording("voice", "image", isRecording = false))
+        assertFalse(shouldDiscardVoiceRecording("text", "voice", isRecording = true))
+    }
+
+    @Test
     fun requiresContentForTextAndMediaMessages() {
         assertEquals("Write a message before sending.", publicMessageValidationError("text", text = "   "))
         assertEquals(null, publicMessageValidationError("text", text = "Say something kind"))
