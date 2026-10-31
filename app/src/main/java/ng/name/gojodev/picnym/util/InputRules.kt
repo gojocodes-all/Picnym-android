@@ -21,6 +21,12 @@ fun normalizeDisplayName(value: String): String = value.trim()
 fun isValidPasswordForAuth(password: String, creatingAccount: Boolean): Boolean =
     if (creatingAccount) password.length >= 8 else password.isNotBlank()
 
+fun shouldDiscardVoiceRecording(
+    currentKind: String,
+    nextKind: String,
+    isRecording: Boolean
+): Boolean = isRecording && currentKind == "voice" && nextKind != currentKind
+
 fun publicMessageValidationError(
     kind: String,
     text: String = "",

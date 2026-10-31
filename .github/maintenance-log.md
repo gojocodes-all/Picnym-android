@@ -1,5 +1,31 @@
 # Maintenance log
 
+## 2026-10-31 — Stop voice capture when leaving the recorder
+
+### Rationale
+
+The anonymous composer allowed users to switch away from the Voice tab while a recording was active. That hid the stop control while the microphone continued recording until the user returned to Voice or left the screen. Leaving Voice now stops and discards only the active recording and clears feedback from the previous composer mode.
+
+### Files changed
+
+- `app/src/main/java/ng/name/gojodev/picnym/ui/screens/PublicInboxScreen.kt` — route composer-mode changes through the recording cleanup policy.
+- `app/src/main/java/ng/name/gojodev/picnym/util/InputRules.kt` — add a deterministic voice-mode transition rule.
+- `app/src/test/java/ng/name/gojodev/picnym/util/InputRulesTest.kt` — cover active, completed and unrelated mode transitions.
+- `.github/maintenance-log.md` — record the change, validation, risk and rollback.
+
+### Validation
+
+- Attempted the complete Gradle validation command locally; the sandbox could not reach `services.gradle.org` to download the checked-in Gradle 8.13 distribution.
+- Ran `git diff --check`, checked the focused transition truth table, and reviewed the complete diff for microphone privacy, accessibility, mobile behavior, backward compatibility and repository conventions. The pull request's hosted Android workflow is the authoritative JVM test, lint and APK-build gate.
+
+### Risk
+
+Low. The cleanup runs only when an active Voice recording is left. Completed voice notes, selected images, text and poll drafts, API requests, permissions, dependencies and navigation remain unchanged.
+
+### Rollback
+
+Revert this pull request to restore direct composer-tab switching; no data, API or deployment rollback is required.
+
 ## 2026-10-28 — Make Android CI immutable and bounded
 
 ### Rationale

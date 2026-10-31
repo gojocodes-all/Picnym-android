@@ -48,6 +48,7 @@ import ng.name.gojodev.picnym.ui.ProfileAvatar
 import ng.name.gojodev.picnym.util.NativeVoiceRecorder
 import ng.name.gojodev.picnym.util.copyUriToCache
 import ng.name.gojodev.picnym.util.publicMessageValidationError
+import ng.name.gojodev.picnym.util.shouldDiscardVoiceRecording
 import java.io.File
 
 private val inboxPrompts = listOf(
@@ -114,6 +115,18 @@ fun PublicInboxScreen(
 
     fun resetComposer() {
         text = ""; imageFile = null; voiceFile = null; question = ""; options.clear(); options.addAll(listOf("", "")); reveal = false
+    }
+
+    fun selectKind(nextKind: String) {
+        if (nextKind == kind) return
+        if (shouldDiscardVoiceRecording(kind, nextKind, recording)) {
+            recorder.stop(discard = true)
+            recording = false
+            voiceFile = null
+        }
+        kind = nextKind
+        error = null
+        info = null
     }
 
     fun send() {
@@ -190,7 +203,7 @@ fun PublicInboxScreen(
                                 "poll" -> box.settings.allowPolls
                                 else -> true
                             }
-                            FilterChip(selected = kind == value, enabled = enabled, onClick = { kind = value }, shape = MaterialTheme.shapes.extraSmall, label = { Text(value.replaceFirstChar { it.uppercase() }) })
+                            FilterChip(selected = kind == value, enabled = enabled, onClick = { selectKind(value) }, shape = MaterialTheme.shapes.extraSmall, label = { Text(value.replaceFirstChar { it.uppercase() }) })
                         }
                     }
 
