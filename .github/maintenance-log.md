@@ -26,7 +26,7 @@ partially configured recorder and cache file behind.
 - Attempted the repository's Gradle validation locally, but the runner could
   not reach the Gradle distribution service.
 - GitHub Actions passed wrapper validation, then stopped before compilation and
-  tests in two attempts because the pinned Gradle 8.13 download returned HTTP
+  tests in repeated attempts because the pinned Gradle 8.13 download returned HTTP
   504. The pull request remains open pending a successful validation rerun.
 - Ran `git diff --check` and reviewed the complete diff for recorder lifecycle,
   cache cleanup, microphone privacy, accessibility, backward compatibility,
