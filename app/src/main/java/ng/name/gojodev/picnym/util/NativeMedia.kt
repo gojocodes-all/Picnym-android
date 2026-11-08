@@ -31,6 +31,19 @@ fun copyUriToCache(context: Context, uri: Uri, prefix: String): Pair<File, Strin
     return file to mime
 }
 
+internal fun finalizeVoiceRecording(
+    file: File?,
+    stopSucceeded: Boolean,
+    discard: Boolean
+): File? {
+    val isUsable = file?.let { it.isFile && it.length() > 0L } == true
+    if (discard || !stopSucceeded || !isUsable) {
+        file?.delete()
+        return null
+    }
+    return file
+}
+
 class NativeVoiceRecorder(private val context: Context) {
     private var recorder: MediaRecorder? = null
     var file: File? = null
@@ -42,32 +55,35 @@ class NativeVoiceRecorder(private val context: Context) {
         val dir = File(context.cacheDir, "media").apply { mkdirs() }
         val out = File(dir, "voice_${System.currentTimeMillis()}.m4a")
         val r = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) MediaRecorder(context) else MediaRecorder()
-        r.setAudioSource(MediaRecorder.AudioSource.MIC)
-        r.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-        r.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-        r.setAudioEncodingBitRate(96_000)
-        r.setAudioSamplingRate(44_100)
-        r.setOutputFile(out.absolutePath)
-        r.prepare()
-        r.start()
-        recorder = r
-        file = out
+        try {
+            r.setAudioSource(MediaRecorder.AudioSource.MIC)
+            r.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            r.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            r.setAudioEncodingBitRate(96_000)
+            r.setAudioSamplingRate(44_100)
+            r.setOutputFile(out.absolutePath)
+            r.prepare()
+            r.start()
+            recorder = r
+            file = out
+        } catch (failure: Exception) {
+            runCatching { r.reset() }
+            runCatching { r.release() }
+            out.delete()
+            throw failure
+        }
     }
 
     fun stop(discard: Boolean = false): File? {
         val r = recorder
         recorder = null
+        val stopSucceeded = r == null || runCatching { r.stop() }.isSuccess
         if (r != null) {
-            runCatching { r.stop() }
             runCatching { r.reset() }
             runCatching { r.release() }
         }
-        val result = file
-        if (discard) {
-            result?.delete()
-            file = null
-            return null
-        }
+        val result = finalizeVoiceRecording(file, stopSucceeded, discard)
+        file = result
         return result
     }
 }
