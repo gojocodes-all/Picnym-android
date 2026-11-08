@@ -1,5 +1,46 @@
 # Maintenance log
 
+## 2026-11-08 — Reject incomplete native voice recordings
+
+### Rationale
+
+The native recorder ignored failures from `MediaRecorder.stop()` and returned
+the output path anyway. Android can reject a stop when too little usable audio
+was captured, leaving an invalid or empty file that the composer labelled
+ready and attempted to upload. Recorder startup failures could also leave a
+partially configured recorder and cache file behind.
+
+### Files changed
+
+- `app/src/main/java/ng/name/gojodev/picnym/util/NativeMedia.kt` — release a
+  failed recorder, remove partial output, and return only a nonempty recording
+  produced by a successful stop.
+- `app/src/main/java/ng/name/gojodev/picnym/ui/screens/PublicInboxScreen.kt` —
+  keep failed recordings out of composer state and show actionable feedback.
+- `app/src/test/java/ng/name/gojodev/picnym/util/NativeMediaTest.kt` — cover
+  successful, failed, empty, and explicitly discarded recording files.
+- `.github/maintenance-log.md` — record this maintenance work.
+
+### Validation
+
+- Ran the focused JVM recording-finalization tests and the repository's full
+  Gradle validation workflow in GitHub Actions.
+- Ran `git diff --check` and reviewed the complete diff for recorder lifecycle,
+  cache cleanup, microphone privacy, accessibility, backward compatibility,
+  and repository conventions.
+
+### Risk
+
+Low. Successful nonempty voice notes keep the existing MPEG-4/AAC format,
+upload path, permission flow, and API contract. Only failed, empty, or
+explicitly discarded files are removed instead of being offered for upload.
+
+### Rollback
+
+Revert this pull request's squash commit to restore the previous permissive
+recorder cleanup; no API, stored-data, permission, or dependency rollback is
+required.
+
 ## 2026-10-31 — Stop voice capture when leaving the recorder
 
 ### Rationale

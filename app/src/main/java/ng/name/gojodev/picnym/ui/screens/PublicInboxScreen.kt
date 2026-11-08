@@ -95,7 +95,17 @@ fun PublicInboxScreen(
     }
     val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
-            runCatching { recorder.start() }.onSuccess { recording = true; info = "Recording…" }.onFailure { error = it.message }
+            runCatching { recorder.start() }
+                .onSuccess {
+                    recording = true
+                    error = null
+                    info = "Recording…"
+                }
+                .onFailure {
+                    recording = false
+                    info = null
+                    error = it.message ?: "Could not start recording."
+                }
         } else error = "Microphone permission is needed to record a voice note."
     }
 
@@ -230,7 +240,15 @@ fun PublicInboxScreen(
                         "voice" -> {
                             Button(onClick = {
                                 if (recording) {
-                                    voiceFile = recorder.stop(); recording = false; info = "Voice note ready."
+                                    voiceFile = recorder.stop()
+                                    recording = false
+                                    if (voiceFile != null) {
+                                        error = null
+                                        info = "Voice note ready."
+                                    } else {
+                                        info = null
+                                        error = "Could not finish recording. Please try again."
+                                    }
                                 } else micPermission.launch(Manifest.permission.RECORD_AUDIO)
                             }) { Text(if (recording) "Stop recording" else if (voiceFile != null) "Record again" else "Start recording") }
                             voiceFile?.let { Text("Ready: ${it.name}", color = MaterialTheme.colorScheme.primary) }
