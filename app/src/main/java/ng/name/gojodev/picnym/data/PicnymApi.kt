@@ -32,7 +32,7 @@ class PicnymApi(
         authRequired: Boolean = true,
         attachSessionWhenPublic: Boolean = true
     ): JSONObject {
-        val session = store.current()
+        var session = store.current()
         if (authRequired && !session.signedIn) throw ApiException(401, "Sign in required.")
 
         suspend fun execute(token: String?): NetResponse {
@@ -50,12 +50,14 @@ class PicnymApi(
             return NetClient.execute(builder.build())
         }
 
-        val token = if (authRequired || attachSessionWhenPublic) session.accessToken.takeIf { it.isNotBlank() } else null
+        var token = if (authRequired || attachSessionWhenPublic) session.accessToken.takeIf { it.isNotBlank() } else null
         var response = execute(token)
-        if (response.status == 401 && token != null && session.refreshToken.isNotBlank()) {
-            val refreshed = authRepository.refresh(token)
+        if (response.status == 401 && session.refreshToken.isNotBlank()) {
+            val refreshed = authRepository.refresh()
             if (refreshed != null) {
-                response = execute(refreshed.accessToken)
+                session = refreshed
+                token = refreshed.accessToken
+                response = execute(token)
             }
         }
         return response.requireSuccess()
@@ -103,7 +105,7 @@ class PicnymApi(
 
     suspend fun deleteAccount() {
         call("/api/account", "DELETE")
-        authRepository.clearLocalSession()
+        store.clearSession()
     }
 
     suspend fun analytics(): JSONObject = call("/api/account/analytics")

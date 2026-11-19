@@ -10,23 +10,6 @@ PICNYM Android is a native Kotlin + Jetpack Compose application. It does not use
 4. Let Gradle sync and install Android SDK 36 if Android Studio asks.
 5. Build `app`.
 
-## Command-line builds
-
-Use the checked-in Gradle Wrapper rather than installing Gradle globally:
-
-```bash
-./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleRelease
-```
-
-On Windows Command Prompt:
-
-```bat
-gradlew.bat :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleRelease
-```
-
-The wrapper pins Gradle 8.13 and verifies the distribution checksum before
-running it. JDK 17 and Android SDK 36 are still required.
-
 ## Google sign-in setup
 
 The app already uses Android Credential Manager and exchanges the Google ID token with Supabase Auth. To activate it:
@@ -50,13 +33,7 @@ For release builds, add the release/App Signing SHA-1 to the Android OAuth clien
 - Debug: `app/build/outputs/apk/debug/app-debug.apk`
 - Release (unsigned until you add your signing config): `app/build/outputs/apk/release/app-release-unsigned.apk`
 
-GitHub Actions validates the wrapper, runs the same wrapper command for pull
-requests and pushes to `main`, and uploads both APK variants as workflow
-artifacts. The workflow pins every action to an immutable commit, disables
-checkout credential persistence, cancels superseded builds on the same ref and
-limits the build job to 30 minutes. When updating an action, resolve the desired
-upstream release tag to its commit and update both the SHA and version comment
-together.
+GitHub Actions also builds both variants and uploads them as workflow artifacts on pushes to `main`.
 
 ## Signing
 

@@ -47,8 +47,6 @@ import ng.name.gojodev.picnym.ui.PicnymTopBar
 import ng.name.gojodev.picnym.ui.ProfileAvatar
 import ng.name.gojodev.picnym.util.NativeVoiceRecorder
 import ng.name.gojodev.picnym.util.copyUriToCache
-import ng.name.gojodev.picnym.util.publicMessageValidationError
-import ng.name.gojodev.picnym.util.shouldDiscardVoiceRecording
 import java.io.File
 
 private val inboxPrompts = listOf(
@@ -117,34 +115,9 @@ fun PublicInboxScreen(
         text = ""; imageFile = null; voiceFile = null; question = ""; options.clear(); options.addAll(listOf("", "")); reveal = false
     }
 
-    fun selectKind(nextKind: String) {
-        if (nextKind == kind) return
-        if (shouldDiscardVoiceRecording(kind, nextKind, recording)) {
-            recorder.stop(discard = true)
-            recording = false
-            voiceFile = null
-        }
-        kind = nextKind
-        error = null
-        info = null
-    }
-
     fun send() {
         val box = inbox ?: return
         if (box.settings.paused) { error = "This inbox is paused."; return }
-        val validationError = publicMessageValidationError(
-            kind = kind,
-            text = text,
-            hasImage = imageFile != null,
-            hasVoice = voiceFile != null,
-            question = question,
-            options = options
-        )
-        if (validationError != null) {
-            error = validationError
-            info = null
-            return
-        }
         sending = true; error = null; info = null
         scope.launch {
             try {
@@ -203,7 +176,7 @@ fun PublicInboxScreen(
                                 "poll" -> box.settings.allowPolls
                                 else -> true
                             }
-                            FilterChip(selected = kind == value, enabled = enabled, onClick = { selectKind(value) }, shape = MaterialTheme.shapes.extraSmall, label = { Text(value.replaceFirstChar { it.uppercase() }) })
+                            FilterChip(selected = kind == value, enabled = enabled, onClick = { kind = value }, shape = MaterialTheme.shapes.extraSmall, label = { Text(value.replaceFirstChar { it.uppercase() }) })
                         }
                     }
 
